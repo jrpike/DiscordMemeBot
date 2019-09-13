@@ -179,7 +179,7 @@ def main():
 	global main_channel_id
 
 	if len(sys.argv) != 4:
-		print("Usage: $python3 BobbyCoulon.py <hostname> <username> <token_file>")
+		print("Usage: $python3 DiscordMemeBot.py <hostname> <username> <token_file>")
 		return
 
 	hostname = sys.argv[1]
