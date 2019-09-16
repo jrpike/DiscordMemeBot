@@ -36,7 +36,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-	
 	try:
 		global audio_meme_list
 		global cmd_lock
@@ -52,7 +51,7 @@ async def on_message(message):
 
 		cmd_lock = True
 
-		meme_log = client.get_channel(main_channel_id)
+		meme_log = client.get_channel(int(main_channel_id))
 		curr_channel = message.channel
 
 		if message.author == client.user:
@@ -65,7 +64,7 @@ async def on_message(message):
 		if author.voice is not None:
 			channel = author.voice.channel
 
-		if  (message.attachments or (len(content) > 1 and content[0] is not "-")) and curr_channel == meme_log:
+		if  (message.attachments or (len(content) > 1 and content[0] is not "-")) and curr_channel is meme_log:
 			for item in message.attachments + [content]:
 				if ((hasattr(item, "url") and is_image(item.url)) or (item == content and is_image(content))):
 					url = None
@@ -73,7 +72,7 @@ async def on_message(message):
 						url = content
 					else:
 						url = item.url
-					print(url)
+						
 					response = requests.get(url, stream=True)
 					image_name = url.split("/")
 					image_name = image_name[len(image_name) - 1]
@@ -182,14 +181,21 @@ def main():
 		print("Usage: $python3 DiscordMemeBot.py <hostname> <username> <token_file>")
 		return
 
+	token = None
+
 	hostname = sys.argv[1]
 	username = sys.argv[2]
-	password = getpass.getpass()
 
 	token_file = sys.argv[3]
 	with open(token_file) as tf:
-		client.run(tf.readline().strip())
+		token = tf.readline().strip()
 		main_channel_id = tf.readline().strip()
+
+	password = getpass.getpass()
+
+	client.run(token)
+
+
 
 if __name__ == "__main__":
 	main()
