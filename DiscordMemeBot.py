@@ -54,8 +54,8 @@ async def on_message(message):
 		meme_log = client.get_channel(int(main_channel_id))
 		curr_channel = message.channel
 
-		if message.author == client.user:
-			return
+		#if message.author == client.user:
+		#	return
 
 		author = message.author
 		content = message.content
@@ -72,7 +72,7 @@ async def on_message(message):
 						url = content
 					else:
 						url = item.url
-						
+
 					response = requests.get(url, stream=True)
 					image_name = url.split("/")
 					image_name = image_name[len(image_name) - 1]
@@ -97,11 +97,16 @@ async def on_message(message):
 			await curr_channel.send(file=discord.File(local_filename))
 			os.system("rm -f \"" + local_filename + "\"")
 
-		elif content == "-memer":
+		elif content.startswith("-memer"):
 			filenames = FtpDl.get_filenames(hostname, username, password)
 
 			templates = FtpDl.get_templates(hostname, username, password)
 			template = random.choice(templates)
+
+			cmd_params = content.split(" ")
+			if (len(cmd_params) > 1):
+				template = cmd_params[1] + ".png"
+
 			FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, hostname, username, password)
 
 			Memer.make_meme(template, filenames, hostname, username, password)
@@ -111,6 +116,16 @@ async def on_message(message):
 			os.system("rm -f \"null\"")
 			os.system("rm -f \"" + template + "\"")
 			os.system("rm -f \"tmp_meme.png\"")
+
+		elif content == "-listTemplates":
+			templates = FtpDl.get_templates(hostname, username, password)
+
+			template_list_str = "Template List:"
+			for f in templates:
+				l = f.lower().replace(".png", "")
+				template_list_str += ("\n" + l)
+
+			await curr_channel.send(template_list_str)
 
 		elif content == "-updateAudioMemes":
 			files = os.listdir()
