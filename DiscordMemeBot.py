@@ -27,6 +27,8 @@ password = None
 
 main_channel_id = None
 
+bad_reacts = []
+
 def is_image(filename):
 	return (filename.endswith("jpg") or filename.endswith("jpeg") or filename.endswith("png") or filename.endswith("gif"))
 
@@ -46,16 +48,18 @@ async def on_message(message):
 
 		global main_channel_id
 
+		global bad_reacts
+
 		if cmd_lock:
 			return
-
-		cmd_lock = True
 
 		meme_log = client.get_channel(int(main_channel_id))
 		curr_channel = message.channel
 
-		#if message.author == client.user:
-		#	return
+		if message.author == client.user:
+			return
+
+		cmd_lock = True
 
 		author = message.author
 		content = message.content
@@ -103,19 +107,24 @@ async def on_message(message):
 			templates = FtpDl.get_templates(hostname, username, password)
 			template = random.choice(templates)
 
-			cmd_params = content.split(" ")
-			if (len(cmd_params) > 1):
-				template = cmd_params[1] + ".png"
+			if content != "-memer":
+				cmd_params = content.split(" ")
+				if (len(cmd_params) > 1):
+					template = cmd_params[1] + ".png"
 
-			FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, hostname, username, password)
+			if template not in templates:
+				await message.add_reaction(random.choice(bad_reacts))
 
-			Memer.make_meme(template, filenames, hostname, username, password)
+			else:
+				FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, hostname, username, password)
 
-			await curr_channel.send(file=discord.File("tmp_meme.png"))
+				Memer.make_meme(template, filenames, hostname, username, password)
 
-			os.system("rm -f \"null\"")
-			os.system("rm -f \"" + template + "\"")
-			os.system("rm -f \"tmp_meme.png\"")
+				await curr_channel.send(file=discord.File("tmp_meme.png"))
+
+				os.system("rm -f \"null\"")
+				os.system("rm -f \"" + template + "\"")
+				os.system("rm -f \"tmp_meme.png\"")
 
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(hostname, username, password)
@@ -152,32 +161,36 @@ async def on_message(message):
 
 			await curr_channel.send(audio_meme_list_str)
 
-		elif channel is not None and (("-say" in content) or (content.replace("-","") + ".wav" in audio_meme_list)):
-			wav_file = None
-
-			if "-say" in message.content:
-				to_say = message.content.split("-say ")[1]
-				os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
-				wav_file = "tmp.wav"
+		elif ("-say" in content) or (content.replace("-","") + ".wav" in audio_meme_list):
+			
+			if channel is None:
+				await message.add_reaction(random.choice(bad_reacts))
 			else:
-				wav_file = message.content.replace("-", "") + ".wav"
+				wav_file = None
 
-			vc = await channel.connect()
+				if "-say" in content:
+					to_say = content.split("-say ")[1]
+					os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
+					wav_file = "tmp.wav"
+				else:
+					wav_file = content.replace("-", "") + ".wav"
 
-			duration = 0
-			with contextlib.closing(wave.open(wav_file, "r")) as f:
-				frames = f.getnframes()
-				rate = f.getframerate()
-				duration = frames / float(rate)
+				vc = await channel.connect()
 
-			vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
+				duration = 0
+				with contextlib.closing(wave.open(wav_file, "r")) as f:
+					frames = f.getnframes()
+					rate = f.getframerate()
+					duration = frames / float(rate)
 
-			time.sleep(duration)
+				vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
 
-			os.system("rm -f \"tmp.wav\"")
+				time.sleep(duration)
 
-			server = message.guild.voice_client
-			await server.disconnect()
+				os.system("rm -f \"tmp.wav\"")
+
+				server = message.guild.voice_client
+				await server.disconnect()
 
 		cmd_lock = False
 
@@ -192,8 +205,10 @@ def main():
 
 	global main_channel_id
 
-	if len(sys.argv) != 4:
-		print("Usage: $python3 DiscordMemeBot.py <hostname> <username> <token_file>")
+	global bad_reacts
+
+	if len(sys.argv) != 5:
+		print("Usage: $python3 DiscordMemeBot.py <hostname> <username> <token_file> <bad_reacts_file")
 		return
 
 	token = None
@@ -207,6 +222,11 @@ def main():
 		main_channel_id = tf.readline().strip()
 
 	password = getpass.getpass()
+
+	bad_reacts_file = sys.argv[4]
+	with open(bad_reacts_file) as f:
+		for l in f.readlines():
+			bad_reacts.append(l.strip())
 
 	client.run(token)
 
