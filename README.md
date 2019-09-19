@@ -11,6 +11,8 @@ Features:
 - Stores images posted to the main (see notes section) chat log in "/mnt/public/username/MemeDownloads/"
 - Generates random memes by combining templates with previously stored images (via feature above)
 	- "-memer" will generate a random meme
+	- "-memer my_template" will use the template with filename "my_template.png"
+	- "-listTemplates" will post a list of all templates
 	- Templates are drawn from /mnt/public/username/Templates/
 
 Notes:
@@ -18,3 +20,4 @@ Notes:
 	- LINE 1: bot_token
 	- LINE 2: main_channel_id
 - Only images (.jpg, .jpeg, .png, or .gif only) posted to the main channel will be uploaded to the FTP server
+- Incorrectly formatted commands (e.g. no such template) will be reacted to with a random emoji from the "bad_reacts_file"
