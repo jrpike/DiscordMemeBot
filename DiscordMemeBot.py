@@ -51,14 +51,15 @@ async def on_message(message):
 
 		global bad_reacts
 
+		if message.author == client.user:
+			return
+
 		if cmd_lock:
+			await message.add_reaction(random.choice(bad_reacts))
 			return
 
 		meme_log = client.get_channel(int(main_channel_id))
 		curr_channel = message.channel
-
-		if message.author == client.user:
-			return
 
 		cmd_lock = True
 
