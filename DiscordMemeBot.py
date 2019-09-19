@@ -30,6 +30,7 @@ main_channel_id = None
 bad_reacts = []
 
 def is_image(filename):
+	filename = filename.lower()
 	return (filename.endswith("jpg") or filename.endswith("jpeg") or filename.endswith("png") or filename.endswith("gif"))
 
 @client.event
