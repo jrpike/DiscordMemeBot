@@ -88,7 +88,14 @@ async def on_message(message):
 						out_file.close()
 					del response
 					
-					FtpDl.upload_file(image_name, hostname, username, password)
+					file_int = str(random.randint(0, 9999999))
+					file_ext = image_name.split(".")
+					file_ext = file_ext[len(file_ext) - 1]
+
+					new_image_name = file_int + "." + file_ext
+					os.rename(image_name, new_image_name)
+
+					FtpDl.upload_file(new_image_name, hostname, username, password)
 
 		if content == "-roll":
 			filenames = FtpDl.get_filenames(hostname, username, password)
