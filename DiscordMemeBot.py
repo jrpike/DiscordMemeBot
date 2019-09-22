@@ -12,26 +12,29 @@ import shutil
 import requests
 import random
 import getpass
+import string
 
 import FtpDl
 import Memer
 
 client = discord.Client()
-audio_meme_list = []
 
-cmd_lock = False
+class Attribs():
+	audio_meme_list = []
+	bad_reacts = []
 
-hostname = None
-username = None
-password = None
-
-main_channel_id = None
-
-bad_reacts = []
+	cmd_lock = False
+	hostname = None
+	username = None
+	password = None
+	main_channel_id = None
 
 def is_image(filename):
 	filename = filename.lower()
 	return (filename.endswith("jpg") or filename.endswith("jpeg") or filename.endswith("png") or filename.endswith("gif"))
+
+def is_command(content):
+	return len(content) > 1 and content[0] == "-"
 
 @client.event
 async def on_ready():
@@ -40,69 +43,73 @@ async def on_ready():
 @client.event
 async def on_message(message):
 	try:
-		global audio_meme_list
-		global cmd_lock
-
-		global hostname
-		global username
-		global password
-
-		global main_channel_id
-
-		global bad_reacts
-
 		if message.author == client.user:
 			return
 
-		if cmd_lock:
-			await message.add_reaction(random.choice(bad_reacts))
-			return
+		content = message.content
+			
+		while Attribs.cmd_lock and is_command(content):
+			await asyncio.sleep(0.1)
 
-		meme_log = client.get_channel(int(main_channel_id))
+		meme_log = client.get_channel(int(Attribs.main_channel_id))
+		
+		author = message.author
+		attachments = message.attachments
 		curr_channel = message.channel
 
-		cmd_lock = True
-
-		author = message.author
-		content = message.content
+		Attribs.cmd_lock = True
 
 		channel = None
 		if author.voice is not None:
 			channel = author.voice.channel
 
-		if  (message.attachments or (len(content) > 1 and content[0] is not "-")) and curr_channel is meme_log:
-			for item in message.attachments + [content]:
+		# Continue message in main channel and there is an attachment or non-command content string
+		if  (attachments or not is_command(content)) and curr_channel is meme_log:
+			
+			# Iterate through list of all attachments plus content string
+			for item in attachments + [content]:
+
+				# Verify attachment url exists and is an image or content string is a url and image
 				if ((hasattr(item, "url") and is_image(item.url)) or (item == content and is_image(content))):
+					
+					# Set url accordingly
 					url = None
 					if item == content:
 						url = content
 					else:
 						url = item.url
 
+					# Do http request and strip off filepath to get image name only
 					response = requests.get(url, stream=True)
 					image_name = url.split("/")
 					image_name = image_name[len(image_name) - 1]
 
+					# Write the raw to a local temporary file
 					with open(image_name, "wb") as out_file:
 						shutil.copyfileobj(response.raw, out_file)
 						out_file.close()
 					del response
 					
-					file_int = str(random.randint(0, 9999999))
+					# Random filename
+					file_int = "".join(random.choices(string.ascii_uppercase + string.digits, k=N))
+
+					# Get original file extension
 					file_ext = image_name.split(".")
 					file_ext = file_ext[len(file_ext) - 1]
 
+					# Rename with new random filename with original extension
 					new_image_name = file_int + "." + file_ext
 					os.rename(image_name, new_image_name)
 
-					FtpDl.upload_file(new_image_name, hostname, username, password)
+					# Upload the new filename
+					FtpDl.upload_file(new_image_name, Attribs.hostname, Attribs.username, Attribs.password)
 
 		if content == "-roll":
-			filenames = FtpDl.get_filenames(hostname, username, password)
+			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 
 			filename = random.choice(filenames)
 
-			FtpDl.loadFile(filename, hostname, username, password)
+			FtpDl.loadFile(filename, Attribs.hostname, Attribs.username, Attribs.password)
 
 			local_filename = filename.split("/")
 			local_filename = local_filename[len(local_filename) - 1]
@@ -111,9 +118,9 @@ async def on_message(message):
 			os.system("rm -f \"" + local_filename + "\"")
 
 		elif content.startswith("-memer"):
-			filenames = FtpDl.get_filenames(hostname, username, password)
+			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 
-			templates = FtpDl.get_templates(hostname, username, password)
+			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 			template = random.choice(templates)
 
 			if content != "-memer":
@@ -122,12 +129,12 @@ async def on_message(message):
 					template = cmd_params[1] + ".png"
 
 			if template not in templates:
-				await message.add_reaction(random.choice(bad_reacts))
+				await message.add_reaction(random.choice(Attribs.bad_reacts))
 
 			else:
-				FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, hostname, username, password)
+				FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
 
-				Memer.make_meme(template, filenames, hostname, username, password)
+				Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password)
 
 				await curr_channel.send(file=discord.File("tmp_meme.png"))
 
@@ -136,7 +143,7 @@ async def on_message(message):
 				os.system("rm -f \"tmp_meme.png\"")
 
 		elif content == "-listTemplates":
-			templates = FtpDl.get_templates(hostname, username, password)
+			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 
 			template_list_str = "Template List:"
 			for f in templates:
@@ -152,33 +159,33 @@ async def on_message(message):
 				if file.endswith(".wav"):
 					os.system("rm -f \"" + file + "\"")
 
-			FtpDl.loadFiles(hostname, username, password)
+			FtpDl.loadFiles(Attribs.hostname, Attribs.username, Attribs.password)
 
-			audio_meme_list = []
+			Attribs.audio_meme_list = []
 			files = os.listdir()
 
 			for file in files:
 				if file.endswith(".wav"):
-					audio_meme_list.append(file)
+					Attribs.audio_meme_list.append(file)
 			
 		elif content == "-listAudioMemes":
-			audio_meme_list_str = "Audio Meme List:"
+			Attribs.audio_meme_list_str = "Audio Meme List:"
 
-			for f in audio_meme_list:
+			for f in Attribs.audio_meme_list:
 				l = f.replace(".wav", "")
-				audio_meme_list_str += ("\n-" + l)
+				Attribs.audio_meme_list_str += ("\n-" + l)
 
-			await curr_channel.send(audio_meme_list_str)
+			await curr_channel.send(Attribs.audio_meme_list_str)
 
-		elif ("-say" in content) or (content.replace("-","") + ".wav" in audio_meme_list):
+		elif content.startswith("-say") or (content.replace("-","") + ".wav" in Attribs.audio_meme_list):
 			
 			if channel is None:
-				await message.add_reaction(random.choice(bad_reacts))
+				await message.add_reaction(random.choice(Attribs.bad_reacts))
 			else:
 				wav_file = None
 
-				if "-say" in content:
-					to_say = content.split("-say ")[1]
+				if content.startswith("-say"):
+					to_say = content.split("-say ")[1].replace("-", " dash ")
 					os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
 					wav_file = "tmp.wav"
 				else:
@@ -201,45 +208,36 @@ async def on_message(message):
 				server = message.guild.voice_client
 				await server.disconnect()
 
-		cmd_lock = False
+		Attribs.cmd_lock = False
 
 	except Exception as e:
 		print(e)
-		cmd_lock = False
+		Attribs.cmd_lock = False
 
 def main():
-	global hostname
-	global username
-	global password
-
-	global main_channel_id
-
-	global bad_reacts
 
 	if len(sys.argv) != 5:
-		print("Usage: $python3 DiscordMemeBot.py <hostname> <username> <token_file> <bad_reacts_file")
+		print("Usage: $python3 DiscordMemeBot.py <Attribs.hostname> <Attribs.username> <token_file> <Attribs.bad_reacts_file")
 		return
 
 	token = None
 
-	hostname = sys.argv[1]
-	username = sys.argv[2]
+	Attribs.hostname = sys.argv[1]
+	Attribs.username = sys.argv[2]
 
 	token_file = sys.argv[3]
 	with open(token_file) as tf:
 		token = tf.readline().strip()
-		main_channel_id = tf.readline().strip()
+		Attribs.main_channel_id = tf.readline().strip()
 
-	password = getpass.getpass()
+	Attribs.password = getpass.getpass()
 
-	bad_reacts_file = sys.argv[4]
-	with open(bad_reacts_file) as f:
+	Attribs.bad_reacts_file = sys.argv[4]
+	with open(Attribs.bad_reacts_file) as f:
 		for l in f.readlines():
-			bad_reacts.append(l.strip())
+			Attribs.bad_reacts.append(l.strip())
 
 	client.run(token)
-
-
 
 if __name__ == "__main__":
 	main()
