@@ -91,7 +91,7 @@ async def on_message(message):
 					del response
 					
 					# Random filename
-					file_int = "".join(random.choices(string.ascii_uppercase + string.digits, k=N))
+					file_int = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
 
 					# Get original file extension
 					file_ext = image_name.split(".")
