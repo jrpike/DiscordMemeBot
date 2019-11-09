@@ -13,6 +13,9 @@ import requests
 import random
 import getpass
 import string
+import glob
+
+from pytube import YouTube
 
 import FtpDl
 import Memer
@@ -32,6 +35,12 @@ class Attribs():
 def is_image(filename):
 	filename = filename.lower()
 	return (filename.endswith("jpg") or filename.endswith("jpeg") or filename.endswith("png") or filename.endswith("gif"))
+
+def is_video(filename):
+	filename = filename.lower()
+	filename = filename.replace("https://", "")
+	filename = filename.replace("http://", "")
+	return (filename.startswith("youtube.com") or filename.startswith("www.youtube.com"))
 
 def is_command(content):
 	return len(content) > 1 and content[0] == "-"
@@ -103,6 +112,11 @@ async def on_message(message):
 
 					# Upload the new filename
 					FtpDl.upload_file(new_image_name, Attribs.hostname, Attribs.username, Attribs.password)
+
+				if ((hasattr(item, "url") and is_image(item.url)) or (item == content and is_video(content))):
+					yt = YouTube(content).streams.filter(progressive=True, file_extension='mp4').order_by("resolution").first().download()
+					FtpDl.upload_video(yt, Attribs.hostname, Attribs.username, Attribs.password)
+
 
 		if content == "-roll":
 			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)

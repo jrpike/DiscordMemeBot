@@ -37,6 +37,17 @@ def upload_file(filename, h, u, p):
 		sftp.put(filename)
 		os.system("rm -f \"" + filename + "\"")
 
+def upload_video(filename, h, u, p):
+	with pysftp.Connection(h, u, password=p) as sftp:
+		v_dir = "/mnt/public/" + u + "/VideoDownloads/"
+
+		if not sftp.isdir(v_dir):
+			sftp.mkdir(v_dir, mode=777)
+
+		sftp.cwd(v_dir)
+		sftp.put(filename)
+		os.system("rm -f \"" + filename + "\"")
+
 def get_filenames(h, u, p):
 	with pysftp.Connection(h, u, password=p) as sftp:
 		base_dir = "/mnt/public/" + u + "/MemeDownloads/"
