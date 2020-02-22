@@ -9,6 +9,7 @@ Features:
 	- "-updateAudioMemes" updates local files from the FTP server (should be run initially and after adding any new files)
 	- "-listAudioMemes" lists currently local, available to run audio commands
 - Stores images posted to the main (see notes section) chat log in "/mnt/public/username/MemeDownloads/"
+- Stores YouTube videos posted in the main (see notes section) chat log in "/mnt/public/username/VideoDownloads/"
 - Generates random memes by combining templates with previously stored images (via feature above)
 	- "-memer" will generate a random meme
 	- "-memer my_template" will use the template with filename "my_template.png"
