@@ -146,7 +146,7 @@ async def on_message(message):
 				await message.add_reaction(random.choice(Attribs.bad_reacts))
 
 			else:
-				FtpDl.loadFile("/mnt/public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
+				FtpDl.loadFile("public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
 
 				Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password)
 
