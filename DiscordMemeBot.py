@@ -148,13 +148,14 @@ async def on_message(message):
 			else:
 				FtpDl.loadFile("public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
 
-				Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password)
-
-				await curr_channel.send(file=discord.File("tmp_meme.png"))
-
-				os.system("rm -f \"null\"")
-				os.system("rm -f \"" + template + "\"")
-				os.system("rm -f \"tmp_meme.png\"")
+				
+				if Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
+					await curr_channel.send(file=discord.File("tmp_meme.png"))
+					os.system("rm -f \"null\"")
+					os.system("rm -f \"" + template + "\"")
+					os.system("rm -f \"tmp_meme.png\"")
+				else:
+					await curr_channel.send(random.choice(Attribs.bad_reacts))
 
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
