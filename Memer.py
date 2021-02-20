@@ -36,28 +36,38 @@ def make_meme(template, imgs, hostname, username, password):
 		
 	with Image.open(template).convert("RGBA") as template_im:
 		final_imgs = []
-
+		failure = False
+		
 		for area in areas:
 			final_img = None
 			while final_img is None or final_img in final_imgs:
 				final_img = random.choice(imgs)
+			
 			FtpDl.loadFile(final_img, hostname, username, password)
 			final_imgs.append(final_img)
 			
-			final_img = final_img.split("/")
-			final_img = final_img[len(final_img) - 1]
+			try:
+				final_img = final_img.split("/")
+				final_img = final_img[len(final_img) - 1]
 
-			with Image.open(final_img).convert("RGBA") as im:
-				im = im.resize((area.x_offset, area.y_offset))
-				
-				template_im.paste(im, (area.x_coord, area.y_coord), im)
+				with Image.open(final_img).convert("RGBA") as im:
+					im = im.resize((area.x_offset, area.y_offset))
+
+					template_im.paste(im, (area.x_coord, area.y_coord), im)
+			except:
+				failure = True
+				break
 
 		for fi in final_imgs:
 			fi = fi.split("/")
 			fi = fi[len(fi) - 1]
 			os.system("rm -f \"" + fi + "\"")
 
-		template_im.save("tmp_meme.png")
+		if failure:
+			return False
+		else:
+			template_im.save("tmp_meme.png")
+			return True
 
 
 
