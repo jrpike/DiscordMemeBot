@@ -158,9 +158,9 @@ async def on_message(message):
 						
 						template = random.choice(templates)
 						if userTemplate:
-							return
+							break
 				
-				if Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
+				if not error and Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
 					await curr_channel.send(file=discord.File("tmp_meme.png"))
 					os.system("rm -f \"null\"")
 					os.system("rm -f \"" + template + "\"")
