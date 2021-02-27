@@ -117,7 +117,6 @@ async def on_message(message):
 					yt = YouTube(content).streams.filter(progressive=True, file_extension='mp4').order_by("resolution").first().download()
 					FtpDl.upload_video(yt, Attribs.hostname, Attribs.username, Attribs.password)
 
-
 		if content == "-roll":
 			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 
@@ -155,6 +154,7 @@ async def on_message(message):
 					os.system("rm -f \"" + template + "\"")
 					os.system("rm -f \"tmp_meme.png\"")
 				else:
+					print("Couldn't make meme with template: " + template)
 					await curr_channel.send(random.choice(Attribs.bad_reacts))
 
 		elif content == "-listTemplates":
@@ -226,7 +226,6 @@ async def on_message(message):
 		Attribs.cmd_lock = False
 
 def main():
-
 	if len(sys.argv) != 5:
 		print("Usage: $python3 DiscordMemeBot.py <Attribs.hostname> <Attribs.username> <token_file> <Attribs.bad_reacts_file")
 		return
