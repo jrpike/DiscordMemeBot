@@ -55,6 +55,7 @@ def make_meme(template, imgs, hostname, username, password):
 
 					template_im.paste(im, (area.x_coord, area.y_coord), im)
 			except:
+				print("Error on image: " + final_img)
 				failure = True
 				break
 
