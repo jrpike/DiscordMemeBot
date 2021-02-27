@@ -45,6 +45,9 @@ def is_video(filename):
 def is_command(content):
 	return len(content) > 1 and content[0] == "-"
 
+def clean_images():
+	os.system("rm -f *.png *.PNG *.jpg *.JPG *.jpeg *.JPEG")
+
 @client.event
 async def on_ready():
 	print('We have logged in as {0.user}'.format(client))
@@ -128,7 +131,7 @@ async def on_message(message):
 			local_filename = local_filename[len(local_filename) - 1]
 
 			await curr_channel.send(file=discord.File(local_filename))
-			os.system("rm -f \"" + local_filename + "\"")
+			clean_images()
 
 		elif content.startswith("-memer"):
 			userTemplate = False
@@ -163,9 +166,8 @@ async def on_message(message):
 				if not error and Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
 					await curr_channel.send(file=discord.File("tmp_meme.png"))
 					os.system("rm -f \"null\"")
-					os.system("rm -f \"" + template + "\"")
-					os.system("rm -f \"tmp_meme.png\"")
-
+			clean_images()
+					
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 
