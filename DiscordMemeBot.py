@@ -155,6 +155,8 @@ async def on_message(message):
 					except:
 						print("Couldn't make meme with template: " + template)
 						await curr_channel.send(template + " seems corrupt")
+						
+						template = random.choice(templates)
 						if userTemplate:
 							return
 				
@@ -163,8 +165,6 @@ async def on_message(message):
 					os.system("rm -f \"null\"")
 					os.system("rm -f \"" + template + "\"")
 					os.system("rm -f \"tmp_meme.png\"")
-				else:
-					print("Couldn't make meme with template: " + template)
 
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
