@@ -131,12 +131,14 @@ async def on_message(message):
 			os.system("rm -f \"" + local_filename + "\"")
 
 		elif content.startswith("-memer"):
+			userTemplate = False
 			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 			template = random.choice(templates)
 
 			if content != "-memer":
+				userTemplate = True
 				cmd_params = content.split(" ")
 				if (len(cmd_params) > 1):
 					template = cmd_params[1] + ".png"
@@ -145,8 +147,16 @@ async def on_message(message):
 				await message.add_reaction(random.choice(Attribs.bad_reacts))
 
 			else:
-				FtpDl.loadFile("public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
-
+				error = True
+				while error:
+					try:
+						FtpDl.loadFile("public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
+						error = False
+					except:
+						print("Couldn't make meme with template: " + template)
+						await curr_channel.send(template + " seems corrupt")
+						if userTemplate:
+							return
 				
 				if Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
 					await curr_channel.send(file=discord.File("tmp_meme.png"))
@@ -155,7 +165,6 @@ async def on_message(message):
 					os.system("rm -f \"tmp_meme.png\"")
 				else:
 					print("Couldn't make meme with template: " + template)
-					await curr_channel.send(random.choice(Attribs.bad_reacts))
 
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
