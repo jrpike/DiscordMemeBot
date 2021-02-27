@@ -168,11 +168,7 @@ async def on_message(message):
 			await curr_channel.send(template_list_str)
 
 		elif content == "-updateAudioMemes":
-			files = os.listdir()
-
-			for file in files:
-				if file.endswith(".wav"):
-					os.system("rm -f \"" + file + "\"")
+			os.system("rm -f *.wav")
 
 			FtpDl.loadFiles(Attribs.hostname, Attribs.username, Attribs.password)
 
