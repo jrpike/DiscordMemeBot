@@ -15,12 +15,18 @@ import getpass
 import string
 import glob
 
-from pytube import YouTube
-
 import FtpDl
 import Memer
 
-client = discord.Client()
+intents = discord.Intents.default()
+
+intents.messages=True
+intents.emojis=True
+intents.reactions=True
+intents.message_content=True
+intents.dm_messages=True
+
+client = discord.Client(intents=intents)
 
 class Attribs():
 	audio_meme_list = []
@@ -238,7 +244,7 @@ async def on_message(message):
 
 def main():
 	if len(sys.argv) != 5:
-		print("Usage: $python3 DiscordMemeBot.py <Attribs.hostname> <Attribs.username> <token_file> <Attribs.bad_reacts_file")
+		print("Usage: $python3 DiscordMemeBot.py <Attribs.hostname> <Attribs.username> <token_file> <Attribs.bad_reacts_file>")
 		return
 
 	token = None
