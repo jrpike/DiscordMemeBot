@@ -229,7 +229,7 @@ async def on_message(message):
 
 				vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
 
-				time.sleep(duration)
+				await asyncio.sleep(duration)
 
 				os.system("rm -f \"tmp.wav\"")
 
