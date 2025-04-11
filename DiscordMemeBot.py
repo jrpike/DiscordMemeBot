@@ -182,7 +182,7 @@ async def on_message(message):
 			template_list_str = "Template List:"
 			for f in templates:
 				l = f.lower().replace(".png", "")
-				template_list_str += ("\n" + l)
+				template_list_str += (" " + l)
 
 			await curr_channel.send(template_list_str)
 
@@ -203,7 +203,7 @@ async def on_message(message):
 
 			for f in Attribs.audio_meme_list:
 				l = f.replace(".wav", "")
-				Attribs.audio_meme_list_str += ("\n-" + l)
+				Attribs.audio_meme_list_str += (" -" + l)
 
 			await curr_channel.send(Attribs.audio_meme_list_str)
 
