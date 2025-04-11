@@ -159,7 +159,7 @@ async def on_message(message):
 				error = True
 				while error:
 					try:
-						FtpDl.loadFile("public/Bobby_Coulon/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
+						FtpDl.loadFile("data/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
 						error = False
 					except:
 						print("Couldn't make meme with template: " + template)
