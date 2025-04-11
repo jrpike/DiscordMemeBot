@@ -50,7 +50,7 @@ def make_meme(template, imgs, hostname, username, password):
 		img_choices = []
 		cropped_imgs = []
 		failure = False
-		with multiprocessing.Pool(len(img_choices)) as pool:
+		with multiprocessing.Pool(len(areas)) as pool:
 			for area in areas:
 				img_choice = None
 				while img_choice is None or img_choice in img_choices:
