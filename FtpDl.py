@@ -16,7 +16,7 @@ def loadFile(filename, h, u, p):
 
 def loadFiles(h, u, p):
 	with pysftp.Connection(host=h, username=u, password=p, cnopts=cnopts) as sftp:
-		sftp.cwd("data/" + u + "/AudioMemes/")
+		sftp.cwd("data/AudioMemes/")
 
 		files = sftp.listdir()
 
@@ -31,7 +31,7 @@ def loadFiles(h, u, p):
 def upload_file(filename, h, u, p):
 	with pysftp.Connection(host=h, username=u, password=p, cnopts=cnopts) as sftp:
 		date_str = now.strftime("%Y-%m-%d")
-		date_dir = "data/" + u + "/MemeDownloads/" + date_str
+		date_dir = "data/MemeDownloads/" + date_str
 
 		if not sftp.isdir(date_dir):
 			sftp.mkdir(date_dir, mode=777)
@@ -42,7 +42,7 @@ def upload_file(filename, h, u, p):
 
 def upload_video(filename, h, u, p):
 	with pysftp.Connection(host=h, username=u, password=p, cnopts=cnopts) as sftp:
-		v_dir = "data/" + u + "/VideoDownloads/"
+		v_dir = "data/VideoDownloads/"
 
 		if not sftp.isdir(v_dir):
 			sftp.mkdir(v_dir, mode=777)
@@ -53,7 +53,7 @@ def upload_video(filename, h, u, p):
 
 def get_filenames(h, u, p):
 	with pysftp.Connection(host=h, username=u, password=p, cnopts=cnopts) as sftp:
-		base_dir = "data/" + u + "/MemeDownloads/"
+		base_dir = "data/MemeDownloads/"
 
 		sftp.cwd(base_dir)
 		date_dirs = sftp.listdir()
@@ -72,7 +72,7 @@ def get_filenames(h, u, p):
 
 def get_templates(h, u, p):
 	with pysftp.Connection(host=h, username=u, password=p, cnopts=cnopts) as sftp:
-		base_dir = "data/" + u + "/Templates/"
+		base_dir = "data/Templates/"
 
 		sftp.cwd(base_dir)
 		templates = sftp.listdir()
