@@ -6,6 +6,7 @@ import asyncio
 import time
 import os
 import sys
+import time
 import wave
 import contextlib
 import shutil
@@ -61,6 +62,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
 	try:
+		start = time.time()
 		if message.author == client.user:
 			return
 
@@ -237,7 +239,8 @@ async def on_message(message):
 				await server.disconnect()
 
 		Attribs.cmd_lock = False
-
+		end = time.time()
+		print("Elapsed: " + str(end - start))
 	except Exception as e:
 		print(e)
 		Attribs.cmd_lock = False
