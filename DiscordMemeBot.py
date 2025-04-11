@@ -19,6 +19,9 @@ import glob
 import FtpDl
 import Memer
 
+meme_file_cache_last_updated = 0
+meme_file_cache = []
+
 intents = discord.Intents.default()
 
 intents.messages=True
@@ -143,7 +146,11 @@ async def on_message(message):
 
 		elif content.startswith("-memer"):
 			userTemplate = False
-			filenames = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
+
+			curr_time = time.time()
+			if (curr_time - meme_file_cache_last_updated > 60):
+				meme_file_cache = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
+				meme_file_cache_last_updated = curr_time
 
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 			template = random.choice(templates)
@@ -171,7 +178,7 @@ async def on_message(message):
 						if userTemplate:
 							break
 				
-				if not error and Memer.make_meme(template, filenames, Attribs.hostname, Attribs.username, Attribs.password):
+				if not error and Memer.make_meme(template, meme_file_cache, Attribs.hostname, Attribs.username, Attribs.password):
 					await curr_channel.send(file=discord.File("tmp_meme.png"))
 					os.system("rm -f \"null\"")
 			clean_images()
