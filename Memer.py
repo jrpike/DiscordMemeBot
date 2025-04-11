@@ -1,6 +1,7 @@
 import subprocess
 import re
 import os
+import multiprocessing
 from PIL import Image
 import random
 
@@ -12,6 +13,17 @@ class ImgArea:
 		self.y_coord = int(y_c)
 		self.x_offset = int(x_o)
 		self.y_offset = int(y_o)
+
+def resize_image(hostname, username, password, area, img):
+	FtpDl.loadFile(img, hostname, username, password)
+	try:
+		img = img.split("/")
+		img = img[len(img) - 1]
+		with Image.open(img).convert("RGBA") as im:
+			return (im.resize((area.x_offset, area.y_offset)), (area.x_coord, area.y_coord))
+	except:
+		print("Error on image: " + img)
+		return None
 
 def make_meme(template, imgs, hostname, username, password):
 	convert_cmd = "magick convert " + template + " -alpha extract -negate -threshold 50% "
@@ -35,31 +47,23 @@ def make_meme(template, imgs, hostname, username, password):
 		areas.append(tmp_area)
 		
 	with Image.open(template).convert("RGBA") as template_im:
-		final_imgs = []
+		img_choices = []
+		cropped_imgs = []
 		failure = False
+		with multiprocessing.Pool(len(img_choices)) as pool:
+			for area in areas:
+				img_choice = None
+				while img_choice is None or img_choice in img_choices:
+					img_choice = random.choice(imgs)
+				img_choices.append(img_choice)
+				pool.apply_async(resize_image, (hostname, username, password, area, img_choice,), callback=lambda x: cropped_imgs.append(x) if x is not None else None)
+			pool.close()
+			pool.join()
 		
-		for area in areas:
-			final_img = None
-			while final_img is None or final_img in final_imgs:
-				final_img = random.choice(imgs)
-			
-			FtpDl.loadFile(final_img, hostname, username, password)
-			final_imgs.append(final_img)
-			
-			try:
-				final_img = final_img.split("/")
-				final_img = final_img[len(final_img) - 1]
+		for cropped_img in cropped_imgs:
+			template_im.paste(cropped_img[0], cropped_img[1], cropped_img[0])
 
-				with Image.open(final_img).convert("RGBA") as im:
-					im = im.resize((area.x_offset, area.y_offset))
-
-					template_im.paste(im, (area.x_coord, area.y_coord), im)
-			except:
-				print("Error on image: " + final_img)
-				failure = True
-				break
-
-		for fi in final_imgs:
+		for fi in img_choices:
 			fi = fi.split("/")
 			fi = fi[len(fi) - 1]
 			os.system("rm -f \"" + fi + "\"")
