@@ -33,7 +33,6 @@ class Attribs():
 	audio_meme_list = []
 	bad_reacts = []
 
-	cmd_lock = False
 	hostname = None
 	username = None
 	password = None
@@ -69,16 +68,11 @@ async def on_message(message):
 
 		content = message.content
 			
-		while Attribs.cmd_lock and is_command(content):
-			await asyncio.sleep(0.1)
-
 		meme_log = client.get_channel(int(Attribs.main_channel_id))
 		
 		author = message.author
 		attachments = message.attachments
 		curr_channel = message.channel
-
-		Attribs.cmd_lock = True
 
 		channel = None
 		if author.voice is not None:
@@ -246,10 +240,8 @@ async def on_message(message):
 				server = message.guild.voice_client
 				await server.disconnect()
 
-		Attribs.cmd_lock = False
 	except Exception as e:
 		print(e)
-		Attribs.cmd_lock = False
 
 def main():
 	if len(sys.argv) != 5:
