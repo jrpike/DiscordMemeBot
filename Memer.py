@@ -30,7 +30,7 @@ def resize_image(hostname, username, password, area, img):
 		return None
 
 def make_meme(template, imgs, hostname, username, password):
-	convert_cmd = "magick convert " + template + " -alpha extract -negate -threshold 50% "
+	convert_cmd = "magick " + template + " -alpha extract -negate -threshold 50% "
 	convert_cmd += "-define connected-components:verbose=true "
 	convert_cmd += "-define connected-components:area-threshold=100 "
 	convert_cmd += "-connected-components 8 -auto-level null -quality 50"
