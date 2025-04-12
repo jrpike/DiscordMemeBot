@@ -133,7 +133,7 @@ async def on_message(message):
 			local_filename = filename.split("/")
 			local_filename = local_filename[len(local_filename) - 1]
 
-			asyncio.create_task(await curr_channel.send(file=discord.File(local_filename)))
+			await client.loop.run_in_executor(await curr_channel.send(file=discord.File(local_filename)))
 			clean_image(filename)
 
 		elif content.startswith("-memer"):
@@ -157,7 +157,7 @@ async def on_message(message):
 					template = cmd_params[1] + ".png"
 
 			if template not in templates:
-				asyncio.create_task(message.add_reaction(random.choice(Attribs.bad_reacts)))
+				await client.loop.run_in_executor(message.add_reaction(random.choice(Attribs.bad_reacts)))
 
 			else:
 				error = True
@@ -167,7 +167,7 @@ async def on_message(message):
 						error = False
 					except Exception as e:
 						print("Couldn't make meme with template: " + template + "... " + str(e))
-						asyncio.create_task(curr_channel.send(template + " seems corrupt"))
+						await client.loop.run_in_executor(curr_channel.send(template + " seems corrupt"))
 						
 						template = random.choice(templates)
 						if userTemplate:
@@ -175,7 +175,7 @@ async def on_message(message):
 				
 				if not error:
 					filename = Memer.make_meme(template, Attribs.meme_file_cache, Attribs.hostname, Attribs.username, Attribs.password)
-					asyncio.create_task(curr_channel.send(file=discord.File(filename)))
+					await client.loop.run_in_executor(curr_channel.send(file=discord.File(filename)))
 					os.system("rm -f \"null\"")
 					clean_image(filename)
 					
@@ -187,7 +187,7 @@ async def on_message(message):
 				l = f.lower().replace(".png", "")
 				template_list_str += (" " + l)
 
-			asyncio.create_task(curr_channel.send(template_list_str))
+			await client.loop.run_in_executor(curr_channel.send(template_list_str))
 
 		elif content == "-updateAudioMemes":
 			os.system("rm -f *.wav")
@@ -208,7 +208,7 @@ async def on_message(message):
 				l = f.replace(".wav", "")
 				Attribs.audio_meme_list_str += (" -" + l)
 
-			asyncio.create_task(curr_channel.send(Attribs.audio_meme_list_str))
+			await client.loop.run_in_executor(curr_channel.send(Attribs.audio_meme_list_str))
 
 		elif content.startswith("-say") or (content.replace("-","") + ".wav" in Attribs.audio_meme_list):
 			
