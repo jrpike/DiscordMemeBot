@@ -6,7 +6,6 @@ import asyncio
 import time
 import os
 import sys
-import time
 import wave
 import contextlib
 import shutil
@@ -14,7 +13,6 @@ import requests
 import random
 import getpass
 import string
-import glob
 
 import FtpDl
 import Memer
@@ -60,7 +58,7 @@ def clean_image(filename):
 async def play_vc(channel, message, wav_file, duration):
 	vc = await channel.connect()
 	vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
-	time.sleep(duration)
+	await asyncio.sleep(duration)
 	if message.content.startswith("-say"):
 		os.system("rm -f \"" + wav_file + "\"")
 
