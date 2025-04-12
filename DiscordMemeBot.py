@@ -18,6 +18,7 @@ import glob
 
 import FtpDl
 import Memer
+import Util
 
 intents = discord.Intents.default()
 
@@ -56,9 +57,15 @@ def is_command(content):
 def clean_image(filename):
 	os.system("rm -f " + filename)
 
-@client.event
-async def on_ready():
-	print('We have logged in as {0.user}'.format(client))
+async def play_vc(channel, message, wav_file, duration):
+	vc = await channel.connect()
+	vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
+	asyncio.sleep(duration)
+	if message.content.startswith("-say"):
+		os.system("rm -f \"" + wav_file + "\"")
+
+	server = message.guild.voice_client
+	server.disconnect()
 
 def on_message_wrapper(message):
 	try:
@@ -217,12 +224,10 @@ def on_message_wrapper(message):
 
 				if content.startswith("-say"):
 					to_say = content.split("-say ")[1].replace("-", " dash ")
-					os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
-					wav_file = "tmp.wav"
+					wav_file = Util.rand_string(10) + ".wav"
+					os.system("espeak -w \"" + wav_file + "\" \"" + to_say + "\"")
 				else:
 					wav_file = content.replace("-", "") + ".wav"
-
-				vc = client.loop.create_task(channel.connect())
 
 				duration = 0
 				with contextlib.closing(wave.open(wav_file, "r")) as f:
@@ -230,14 +235,7 @@ def on_message_wrapper(message):
 					rate = f.getframerate()
 					duration = frames / float(rate)
 
-				vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
-
-				asyncio.sleep(duration)
-
-				os.system("rm -f \"tmp.wav\"")
-
-				server = message.guild.voice_client
-				server.disconnect()
+				vc = client.loop.create_task(play_vc(channel, message, wav_file, duration))
 
 	except Exception as e:
 		print(e)
@@ -245,6 +243,10 @@ def on_message_wrapper(message):
 @client.event
 async def on_message(message):
 	await asyncio.get_running_loop().run_in_executor(None, on_message_wrapper, message)
+
+@client.event
+async def on_ready():
+	print('We have logged in as {0.user}'.format(client))
 
 def main():
 	if len(sys.argv) != 5:
