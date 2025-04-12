@@ -222,7 +222,7 @@ def on_message_wrapper(message):
 				else:
 					wav_file = content.replace("-", "") + ".wav"
 
-				vc = asyncio.get_event_loop().create_task(channel.connect())
+				vc = client.loop.create_task(channel.connect())
 
 				duration = 0
 				with contextlib.closing(wave.open(wav_file, "r")) as f:
