@@ -175,7 +175,7 @@ async def on_message(message):
 				
 				if not error:
 					filename = Memer.make_meme(template, Attribs.meme_file_cache, Attribs.hostname, Attribs.username, Attribs.password)
-					await curr_channel.send(file=discord.File("tmp_meme.png"))
+					await curr_channel.send(file=discord.File(filename))
 					os.system("rm -f \"null\"")
 					clean_image(filename)
 					
