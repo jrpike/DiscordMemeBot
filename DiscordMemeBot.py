@@ -60,9 +60,22 @@ def clean_image(filename):
 async def on_ready():
 	print('We have logged in as {0.user}'.format(client))
 
-def on_message_wrapper(message, attachments, curr_channel, meme_log):
+def on_message_wrapper(message):
 	try:
+		if message.author == client.user:
+			return
+
 		content = message.content
+			
+		meme_log = client.get_channel(int(Attribs.main_channel_id))
+		
+		author = message.author
+		attachments = message.attachments
+		curr_channel = message.channel
+
+		channel = None
+		if author.voice is not None:
+			channel = author.voice.channel
 
 		# Continue message in main channel and there is an attachment or non-command content string
 		if  (attachments or not is_command(content)) and curr_channel is meme_log:
@@ -196,57 +209,42 @@ def on_message_wrapper(message, attachments, curr_channel, meme_log):
 
 			client.loop.create_task(curr_channel.send(Attribs.audio_meme_list_str))
 
+		elif content.startswith("-say") or (content.replace("-","") + ".wav" in Attribs.audio_meme_list):
+			if channel is None:
+				client.loop.create_task(message.add_reaction(random.choice(Attribs.bad_reacts)))
+			else:
+				wav_file = None
+
+				if content.startswith("-say"):
+					to_say = content.split("-say ")[1].replace("-", " dash ")
+					os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
+					wav_file = "tmp.wav"
+				else:
+					wav_file = content.replace("-", "") + ".wav"
+
+				vc = asyncio.get_event_loop().create_task(channel.connect())
+
+				duration = 0
+				with contextlib.closing(wave.open(wav_file, "r")) as f:
+					frames = f.getnframes()
+					rate = f.getframerate()
+					duration = frames / float(rate)
+
+				vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
+
+				asyncio.sleep(duration)
+
+				os.system("rm -f \"tmp.wav\"")
+
+				server = message.guild.voice_client
+				server.disconnect()
+
 	except Exception as e:
 		print(e)
 
 @client.event
 async def on_message(message):
-	if message.author == client.user:
-		return
-
-	content = message.content
-		
-	meme_log = client.get_channel(int(Attribs.main_channel_id))
-	
-	author = message.author
-	attachments = message.attachments
-	curr_channel = message.channel
-
-	channel = None
-	if author.voice is not None:
-		channel = author.voice.channel
-
-	if content.startswith("-say") or (content.replace("-","") + ".wav" in Attribs.audio_meme_list):
-		if channel is None:
-			client.loop.create_task(message.add_reaction(random.choice(Attribs.bad_reacts)))
-		else:
-			wav_file = None
-
-			if content.startswith("-say"):
-				to_say = content.split("-say ")[1].replace("-", " dash ")
-				os.system("espeak -w \"tmp.wav\" \"" + to_say + "\"")
-				wav_file = "tmp.wav"
-			else:
-				wav_file = content.replace("-", "") + ".wav"
-
-			vc = await channel.connect()
-
-			duration = 0
-			with contextlib.closing(wave.open(wav_file, "r")) as f:
-				frames = f.getnframes()
-				rate = f.getframerate()
-				duration = frames / float(rate)
-
-			vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
-
-			asyncio.sleep(duration)
-
-			os.system("rm -f \"tmp.wav\"")
-
-			server = message.guild.voice_client
-			server.disconnect()
-	else:
-		await asyncio.get_running_loop().run_in_executor(None, on_message_wrapper, message, attachments, curr_channel, meme_log)
+	await asyncio.get_running_loop().run_in_executor(None, on_message_wrapper, message)
 
 def main():
 	if len(sys.argv) != 5:
