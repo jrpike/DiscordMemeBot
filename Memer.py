@@ -33,7 +33,7 @@ def make_meme(template, imgs, hostname, username, password):
 	convert_cmd = "magick convert " + template + " -alpha extract -negate -threshold 50% "
 	convert_cmd += "-define connected-components:verbose=true "
 	convert_cmd += "-define connected-components:area-threshold=100 "
-	convert_cmd += "-connected-components 8 -auto-level null"
+	convert_cmd += "-connected-components 8 -auto-level null -quality 50"
 
 	output = str(subprocess.check_output(convert_cmd, shell=True))
 
