@@ -60,8 +60,7 @@ def clean_image(filename):
 async def on_ready():
 	print('We have logged in as {0.user}'.format(client))
 
-@client.event
-async def on_message(message):
+def on_message_wrapper(message):
 	try:
 		if message.author == client.user:
 			return
@@ -224,7 +223,7 @@ async def on_message(message):
 				else:
 					wav_file = content.replace("-", "") + ".wav"
 
-				vc = await channel.connect()
+				vc = channel.connect()
 
 				duration = 0
 				with contextlib.closing(wave.open(wav_file, "r")) as f:
@@ -234,15 +233,19 @@ async def on_message(message):
 
 				vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
 
-				await asyncio.sleep(duration)
+				asyncio.sleep(duration)
 
 				os.system("rm -f \"tmp.wav\"")
 
 				server = message.guild.voice_client
-				await server.disconnect()
+				server.disconnect()
 
 	except Exception as e:
 		print(e)
+
+@client.event
+async def on_message(message):
+	await client.get_running_loop().run_in_executor(None, on_message_wrapper, message)
 
 def main():
 	if len(sys.argv) != 5:
