@@ -156,6 +156,7 @@ def on_message_wrapper(message):
 				if (len(cmd_params) > 1):
 					template = cmd_params[1] + ".png"
 
+			template = random.choice(Attribs.template_file_cache)
 			if template not in Attribs.template_file_cache:
 				client.loop.create_task(message.add_reaction(random.choice(Attribs.bad_reacts)))
 
