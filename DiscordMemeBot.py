@@ -36,8 +36,9 @@ class Attribs():
 	username = None
 	password = None
 	main_channel_id = None
-	meme_file_cache_last_updated = 0
+	file_cache_last_updated = 0
 	meme_file_cache = []
+	template_file_cache = []
 
 def is_image(filename):
 	filename = filename.lower()
@@ -144,12 +145,10 @@ def on_message_wrapper(message):
 			userTemplate = False
 
 			curr_time = time.time()
-			if (curr_time - Attribs.meme_file_cache_last_updated > 60):
+			if (curr_time - Attribs.file_cache_last_updated > 60):
 				Attribs.meme_file_cache = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
-				Attribs.meme_file_cache_last_updated = curr_time
-
-			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
-			template = random.choice(templates)
+				Attribs.template_file_cache = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
+				Attribs.file_cache_last_updated = curr_time
 
 			if content != "-memer":
 				userTemplate = True
@@ -157,7 +156,7 @@ def on_message_wrapper(message):
 				if (len(cmd_params) > 1):
 					template = cmd_params[1] + ".png"
 
-			if template not in templates:
+			if template not in Attribs.template_file_cache:
 				client.loop.create_task(message.add_reaction(random.choice(Attribs.bad_reacts)))
 
 			else:
@@ -170,7 +169,7 @@ def on_message_wrapper(message):
 						print("Couldn't make meme with template: " + template + "... " + str(e))
 						client.loop.create_task(curr_channel.send(template + " seems corrupt"))
 						
-						template = random.choice(templates)
+						template = random.choice(Attribs.template_file_cache)
 						if userTemplate:
 							break
 				
@@ -181,10 +180,13 @@ def on_message_wrapper(message):
 					clean_image(filename)
 					
 		elif content == "-listTemplates":
-			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
+			curr_time = time.time()
+			if (curr_time - Attribs.file_cache_last_updated > 60):
+				Attribs.template_file_cache = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
+				Attribs.file_cache_last_updated = curr_time
 
 			template_list_str = "Template List:"
-			for f in templates:
+			for f in Attribs.template_file_cache:
 				l = f.lower().replace(".png", "")
 				template_list_str += (" " + l)
 
