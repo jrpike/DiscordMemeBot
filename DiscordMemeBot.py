@@ -145,11 +145,8 @@ def on_message_wrapper(message):
 
 			curr_time = time.time()
 			if (curr_time - Attribs.meme_file_cache_last_updated > 60):
-				print("updating cache")
 				Attribs.meme_file_cache = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 				Attribs.meme_file_cache_last_updated = curr_time
-			else: 
-				print("cache hit")
 
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 			template = random.choice(templates)
