@@ -229,7 +229,7 @@ async def on_message(message):
 			else:
 				wav_file = content.replace("-", "") + ".wav"
 
-			vc = channel.connect()
+			vc = await channel.connect()
 
 			duration = 0
 			with contextlib.closing(wave.open(wav_file, "r")) as f:
