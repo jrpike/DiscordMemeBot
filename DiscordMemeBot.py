@@ -245,7 +245,7 @@ def on_message_wrapper(message):
 
 @client.event
 async def on_message(message):
-	await client.get_running_loop().run_in_executor(None, on_message_wrapper, message)
+	await asyncio.get_running_loop().run_in_executor(None, on_message_wrapper, message)
 
 def main():
 	if len(sys.argv) != 5:
