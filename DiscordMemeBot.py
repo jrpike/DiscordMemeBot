@@ -60,12 +60,12 @@ def clean_image(filename):
 async def play_vc(channel, message, wav_file, duration):
 	vc = await channel.connect()
 	vc.play(discord.FFmpegPCMAudio(wav_file), after=lambda e: print('done', e))
-	asyncio.sleep(duration)
+	time.sleep(duration)
 	if message.content.startswith("-say"):
 		os.system("rm -f \"" + wav_file + "\"")
 
 	server = message.guild.voice_client
-	server.disconnect()
+	await server.disconnect()
 
 def on_message_wrapper(message):
 	try:
