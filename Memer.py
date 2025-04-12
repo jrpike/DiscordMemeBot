@@ -4,6 +4,7 @@ import os
 import multiprocessing
 from PIL import Image
 import random
+import string
 
 import FtpDl
 
@@ -13,6 +14,9 @@ class ImgArea:
 		self.y_coord = int(y_c)
 		self.x_offset = int(x_o)
 		self.y_offset = int(y_o)
+
+def rand_string(length, characters=string.ascii_letters + string.digits):
+    return ''.join(random.choice(characters) for _ in range(length))
 
 def resize_image(hostname, username, password, area, img):
 	FtpDl.loadFile(img, hostname, username, password)
@@ -49,7 +53,6 @@ def make_meme(template, imgs, hostname, username, password):
 	with Image.open(template).convert("RGBA") as template_im:
 		img_choices = []
 		cropped_imgs = []
-		failure = False
 		with multiprocessing.Pool(len(areas)) as pool:
 			for area in areas:
 				img_choice = None
@@ -68,11 +71,9 @@ def make_meme(template, imgs, hostname, username, password):
 			fi = fi[len(fi) - 1]
 			os.system("rm -f \"" + fi + "\"")
 
-		if failure:
-			return False
-		else:
-			template_im.save("tmp_meme.png")
-			return True
+		filename = rand_string(length=10) + ".png"
+		template_im.save(filename)
+		return filename
 
 
 

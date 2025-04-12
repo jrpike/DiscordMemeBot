@@ -53,8 +53,8 @@ def is_video(filename):
 def is_command(content):
 	return len(content) > 1 and content[0] == "-"
 
-def clean_images():
-	os.system("rm -f *.png *.PNG *.jpg *.JPG *.jpeg *.JPEG")
+def clean_image(filename):
+	os.system("rm -f " + filename)
 
 @client.event
 async def on_ready():
@@ -134,7 +134,7 @@ async def on_message(message):
 			local_filename = local_filename[len(local_filename) - 1]
 
 			await curr_channel.send(file=discord.File(local_filename))
-			clean_images()
+			clean_image(filename)
 
 		elif content.startswith("-memer"):
 			userTemplate = False
@@ -165,18 +165,19 @@ async def on_message(message):
 					try:
 						FtpDl.loadFile("data/Templates/" + template, Attribs.hostname, Attribs.username, Attribs.password)
 						error = False
-					except:
-						print("Couldn't make meme with template: " + template)
+					except Exception as e:
+						print("Couldn't make meme with template: " + template + "... " + str(e))
 						await curr_channel.send(template + " seems corrupt")
 						
 						template = random.choice(templates)
 						if userTemplate:
 							break
 				
-				if not error and Memer.make_meme(template, Attribs.meme_file_cache, Attribs.hostname, Attribs.username, Attribs.password):
+				if not error:
+					filename = Memer.make_meme(template, Attribs.meme_file_cache, Attribs.hostname, Attribs.username, Attribs.password)
 					await curr_channel.send(file=discord.File("tmp_meme.png"))
 					os.system("rm -f \"null\"")
-			clean_images()
+					clean_image(filename)
 					
 		elif content == "-listTemplates":
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
