@@ -64,7 +64,6 @@ async def on_ready():
 @client.event
 async def on_message(message):
 	try:
-		start = time.time()
 		if message.author == client.user:
 			return
 
@@ -148,8 +147,11 @@ async def on_message(message):
 
 			curr_time = time.time()
 			if (curr_time - Attribs.meme_file_cache_last_updated > 60):
+				print("updating cache")
 				Attribs.meme_file_cache = FtpDl.get_filenames(Attribs.hostname, Attribs.username, Attribs.password)
 				Attribs.meme_file_cache_last_updated = curr_time
+			else: 
+				print("cache hit")
 
 			templates = FtpDl.get_templates(Attribs.hostname, Attribs.username, Attribs.password)
 			template = random.choice(templates)
@@ -245,8 +247,6 @@ async def on_message(message):
 				await server.disconnect()
 
 		Attribs.cmd_lock = False
-		end = time.time()
-		print("Elapsed: " + str(end - start))
 	except Exception as e:
 		print(e)
 		Attribs.cmd_lock = False
